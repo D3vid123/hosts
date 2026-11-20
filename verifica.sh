@@ -1,25 +1,26 @@
 #!/bin/bash
 
+verifica_ip()
+{
+    host=$1
+    ip=$2
+    dns=$3
+
+    rezultat=$(nslookup "$host" "$dns" 2>/dev/null |
+        awk '$1=="Name:" {found=1}
+             found && $1=="Address:" {print $2}')
+
+    if echo "$rezultat" | grep -Fxq "$ip"; then
+        echo "$host - asociere corecta"
+    else
+        echo "$host - asociere incorecta"
+    fi
+}
+
 while read -r ip host rest
 do
     [[ -z "$ip" || "$ip" == \#* ]] && continue
 
-    if [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
-        valid=1
+    verifica_ip "$host" "$ip" "8.8.8.8"
 
-        for octet in ${ip//./ }
-        do
-            if (( octet > 255 )); then
-                valid=0
-            fi
-        done
-
-        if (( valid == 1 )); then
-            echo "$host - IP valid: $ip"
-        else
-            echo "$host - IP invalid: $ip"
-        fi
-    else
-        echo "$host - IP invalid: $ip"
-    fi
 done < /etc/hosts
