@@ -24,3 +24,4 @@ do
     verifica_ip "$host" "$ip" "8.8.8.8"
 
 done < /etc/hosts
+echo "Realizat de Mihnea"
